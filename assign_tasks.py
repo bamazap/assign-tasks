@@ -4,31 +4,27 @@ from argparse import ArgumentParser
 from tabulate import tabulate
 
 parser = ArgumentParser(description="Assign tasks to people.")
-
 parser.add_argument("csvfile", type=str, help="Path to CSV file.")
 parser.add_argument("-r", "--ratio", type=float, default=1,
-        help="Scale ranking i to i*geom(r,i)")
-
+        help="Scale ranking k to 1/r * (1 + r + r**2 + ... + r**(k-1))")
 args = parser.parse_args()
+
+def parse_csv_line(line):
+    return [c.strip() for c in line.split(",")]
 
 names = []
 tasks = []
 rankings = []
 with open(args.csvfile) as f:
-    first_row = True
+    tasks = parse_csv_line(f.readline())[1:]
     for line in f.readlines():
-        row = list(map(lambda c: c.strip(), line.split(",")))
-        if first_row:
-            tasks = row[1:]
-            first_row = False
-        else:
-            names.append(row[0])
-            rankings.append(list(map(lambda r: float(r), row[1:])))
+        row = parse_csv_line(line) 
+        names.append(row[0])
+        rankings.append([float(r) for r in row[1:]])
 
 costs = np.array(rankings)
 if args.ratio != 1:
     costs = args.ratio**-1 * (1 - np.power(args.ratio, costs))/(1 - args.ratio)
-print(costs)
 row_ind, col_ind = linear_sum_assignment(costs)
 
 assignments = []
