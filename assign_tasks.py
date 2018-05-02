@@ -4,21 +4,21 @@ from argparse import ArgumentParser
 from tabulate import tabulate
 
 parser = ArgumentParser(description="Assign tasks to people.")
-parser.add_argument("csvfile", type=str, help="Path to CSV file.")
+parser.add_argument("tsvfile", type=str, help="Path to TSV file.")
 parser.add_argument("-r", "--ratio", type=float, default=1,
         help="Scale ranking k to 1/r * (1 + r + r**2 + ... + r**(k-1))")
 args = parser.parse_args()
 
-def parse_csv_line(line):
-    return [c.strip() for c in line.split(",")]
+def parse_tsv_line(line):
+    return [c.strip() for c in line.split("\t")]
 
 names = []
 tasks = []
 rankings = []
-with open(args.csvfile) as f:
-    tasks = parse_csv_line(f.readline())[1:]
+with open(args.tsvfile) as f:
+    tasks = parse_tsv_line(f.readline())[1:]
     for line in f.readlines():
-        row = parse_csv_line(line) 
+        row = parse_tsv_line(line) 
         names.append(row[0])
         rankings.append([float(r) for r in row[1:]])
 
